@@ -3,3 +3,5 @@ reload_on_success: FALSE
 create_profile_after_registration: FALSE
 profile_type: customer
 hide_field_descriptions: FALSE
+header_blocks: {}
+footer_blocks: {}

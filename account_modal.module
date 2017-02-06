@@ -50,6 +50,10 @@ function account_modal_link_alter(&$variables) {
 
   $variables['options']['attributes']['class'][] = 'use-ajax';
   $variables['options']['attributes']['data-dialog-type'] = 'modal';
+  $variables['options']['attributes']['data-dialog-options'] = \Drupal\Component\Serialization\Json::encode([
+    'width' => '480',
+    'classes' => ['account-modal']
+  ]);
 }
 
 /**
@@ -68,6 +72,8 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
   if ($config->get('hide_field_descriptions')) {
     AccountModalAjaxHelper::hideFieldDescriptions($form);
   }
+
+  AccountModalAjaxHelper::injectBlocks($form);
 
   $form['#prefix'] = '<div id="account_modal_' . $pageId . '_wrapper">';
   $form['#suffix'] = '</div>';

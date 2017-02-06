@@ -28,6 +28,8 @@ class AccountModalSettingsForm extends ConfigFormBase {
       ->set('reload_on_success', $form_state->getValue('reload_on_success'))
       ->set('create_profile_after_registration', $form_state->getValue('create_profile_after_registration'))
       ->set('profile_type', $form_state->getValue('profile_type'))
+      ->set('header_blocks', $form_state->getValue('header_blocks'))
+      ->set('footer_blocks', $form_state->getValue('footer_blocks'))
       ->save();
 
     parent::submitForm($form, $form_state);
@@ -85,6 +87,20 @@ class AccountModalSettingsForm extends ConfigFormBase {
       '#description' => $this->t('If creating a profile, enter the bundle to create.'),
       '#disabled' => !$profileIsInstalled,
       '#default_value' => $config->get('profile_type'),
+    ];
+
+    $form['header_blocks'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Header blocks'),
+      '#description' => $this->t('A list of block IDs, one per line, to render in the dialog header.'),
+      '#default_value' => $config->get('header_blocks'),
+    ];
+
+    $form['footer_blocks'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Footer blocks'),
+      '#description' => $this->t('A list of block IDs, one per line, to render in the dialog footer.'),
+      '#default_value' => $config->get('footer_blocks'),
     ];
 
     return parent::buildForm($form, $form_state);

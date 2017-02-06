@@ -3,6 +3,7 @@
 namespace Drupal\account_modal;
 
 use Drupal\account_modal\AjaxCommand\RefreshPageCommand;
+use Drupal\block\Entity\Block;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AppendCommand;
 use Drupal\Core\Ajax\CloseDialogCommand;
@@ -97,5 +98,72 @@ class AccountModalAjaxHelper {
       // Now hide any child field descriptions.
       self::hideFieldDescriptions($form[$key]);
     }
+  }
+
+  public static function injectBlocks(array &$form) {
+    $header_blocks = self::getBlocks('header_blocks');
+
+    if (!empty($header_blocks)) {
+      $form['header_blocks'] = [
+        '#type' => 'container',
+        '#weight' => -100,
+        '#attributes' => [
+          'class' => ['account-modal-header'],
+        ],
+      ];
+
+      $form['header_blocks'] += self::renderBlocks($header_blocks);
+    }
+
+    $footer_blocks = self::getBlocks('footer_blocks');
+
+    if (!empty($footer_blocks)) {
+      $form['footer_blocks'] = [
+        '#type' => 'container',
+        '#weight' => 200,
+        '#attributes' => [
+          'class' => ['account-modal-footer'],
+        ]
+      ];
+
+      $form['footer_blocks'] += self::renderBlocks($footer_blocks);
+    }
+  }
+
+  public static function renderBlocks(array $blocks) {
+    $out = [];
+
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('block');
+
+    foreach ($blocks as $id) {
+      $id = trim($id);
+
+      if (empty($id)) {
+        continue;
+      }
+
+      $block = Block::load($id);
+
+      /** @var \Drupal\Core\Render\RendererInterface $renderer */
+      $renderer = \Drupal::service('renderer');
+
+      $blockView = $view_builder->view($block);
+
+      $out[$id] = [
+        '#markup' => $renderer->render($blockView),
+      ];
+    }
+
+    return $out;
+  }
+
+  public static function getBlocks($key) {
+    $config = \Drupal::config('account_modal.settings');
+
+    $blocks = $config->get($key);
+
+    $blocks = preg_split("/\r\n|\n|\r/", $blocks);
+
+    return $blocks;
   }
 }

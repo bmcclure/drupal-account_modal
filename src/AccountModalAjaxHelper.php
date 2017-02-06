@@ -9,6 +9,9 @@ use Drupal\Core\Ajax\CloseDialogCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * A helper class for creating Ajax responses for Account Modal.
+ */
 class AccountModalAjaxHelper {
   public static function ajaxCallback($pageId, array $form, FormStateInterface $formState) {
     $response = new AjaxResponse();

@@ -6,6 +6,9 @@ use Drupal\account_modal\AccountPageHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * The admin settings form for Account Modal.
+ */
 class AccountModalSettingsForm extends ConfigFormBase {
 
   /**

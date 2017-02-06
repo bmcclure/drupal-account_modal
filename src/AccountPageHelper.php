@@ -4,6 +4,9 @@ namespace Drupal\account_modal;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+/**
+ * A helper class for managing configured account pages.
+ */
 class AccountPageHelper {
   use StringTranslationTrait;
 

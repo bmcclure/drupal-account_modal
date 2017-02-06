@@ -71,18 +71,36 @@ class AccountModalAjaxHelper {
       : new RedirectCommand($base_url . $formState->getRedirect());
   }
 
+  /**
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @return \Drupal\user\UserInterface|null
+   */
+  public static function getUidFromFormState(FormStateInterface $formState) {
+    $values = $formState->getValues();
+
+    $uid = NULL;
+
+    if (isset($values['uid'])) {
+      $uid = $values['uid'];
+    }
+
+    return $uid;
+  }
+
   public static function newProfileCommand(FormStateInterface $formState) {
     $config = \Drupal::config('account_modal.settings');
 
-    $profile = Profile::create([
+    $uid = self::getUidFromFormState($formState);
+
+    $profile = \Drupal::entityTypeManager()->getStorage('profile')->create([
+      'uid' => $uid,
       'type' => $config->get('profile_type') ?: 'customer',
-      'langcode' => \Drupal::languageManager()->getDefaultLanguage()->getId(),
       'is_default' => TRUE,
     ]);
 
     /** @var \Drupal\Core\Entity\EntityFormBuilderInterface $entityFormBuilder */
     $entityFormBuilder = \Drupal::service('entity.form_builder');
-    $form = $entityFormBuilder->getForm($profile);
+    $form = $entityFormBuilder->getForm($profile, 'add', ['uid' => $uid, 'created' => REQUEST_TIME]);
 
     return new OpenModalDialogCommand('Create a Profile', $form);
   }

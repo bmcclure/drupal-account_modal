@@ -88,4 +88,17 @@ class AccountModalAjaxHelper {
 
     return new OpenModalDialogCommand('Create a Profile', $form);
   }
+
+  public static function hideFieldDescriptions(array &$form) {
+    foreach ($form as $key => $element) {
+      if (strpos($key, '#') === 0 || !is_array($element)) {
+        continue; // Skip non-fields or things that aren't arrays
+      }
+
+      unset($form[$key]['#description']);
+
+      // Now hide any child field descriptions.
+      self::hideFieldDescriptions($form[$key]);
+    }
+  }
 }

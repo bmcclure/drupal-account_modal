@@ -63,6 +63,12 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
     return;
   }
 
+  $config = \Drupal::config('account_modal.settings');
+
+  if ($config->get('hide_field_descriptions')) {
+    AccountModalAjaxHelper::hideFieldDescriptions($form);
+  }
+
   $form['#prefix'] = '<div id="account_modal_' . $pageId . '_wrapper">';
   $form['#suffix'] = '</div>';
   $form['actions']['submit']['#ajax'] = ['callback' => 'account_modal_' . $pageId . '_ajax_callback'];

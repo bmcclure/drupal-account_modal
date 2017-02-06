@@ -24,6 +24,7 @@ class AccountModalSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('account_modal.settings')
       ->set('enabled_pages', $form_state->getValue('enabled_pages'))
+      ->set('hide_field_descriptions', $form_state->getValue('hide_field_descriptions'))
       ->set('reload_on_success', $form_state->getValue('reload_on_success'))
       ->set('create_profile_after_registration', $form_state->getValue('create_profile_after_registration'))
       ->set('profile_type', $form_state->getValue('profile_type'))
@@ -50,6 +51,13 @@ class AccountModalSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Select the account pages to show in a modal window.'),
       '#options' => $accountPageHelper->getPageOptions(),
       '#default_value' => $config->get('enabled_pages'),
+    ];
+
+    $form['hide_field_descriptions'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Hide field descriptions'),
+      '#description' => $this->t('Remove field descriptions from forms in the modal.'),
+      '#default_value' => $config->get('hide_field_descriptions'),
     ];
 
     $form['reload_on_success'] = [

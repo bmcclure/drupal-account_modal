@@ -73,7 +73,9 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
     AccountModalAjaxHelper::hideFieldDescriptions($form);
   }
 
-  AccountModalAjaxHelper::injectBlocks($form);
+  if (in_array($pageId, ['login', 'register', 'password'])) {
+    AccountModalAjaxHelper::injectBlocks($form);
+  }
 
   $form['#prefix'] = '<div id="account_modal_' . $pageId . '_wrapper">';
   $form['#suffix'] = '</div>';
@@ -95,7 +97,7 @@ function account_modal_ajax_render_alter(array &$data) {
     return;
   }
 
-  // TODO: Use this to prepent/append blocks and modify output as necessary.
+  // TODO: Use this to prepend/append blocks and modify output as necessary.
 }
 
 function account_modal_login_ajax_callback(array $form, FormStateInterface $form_state) {

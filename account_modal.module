@@ -52,7 +52,7 @@ function account_modal_link_alter(&$variables) {
   $variables['options']['attributes']['data-dialog-type'] = 'modal';
   $variables['options']['attributes']['data-dialog-options'] = \Drupal\Component\Serialization\Json::encode([
     'width' => '480',
-    'classes' => ['account-modal']
+    'dialogClass' => 'account-modal account-modal--' . $page,
   ]);
 }
 
@@ -79,6 +79,23 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
   $form['#suffix'] = '</div>';
   $form['actions']['submit']['#ajax'] = ['callback' => 'account_modal_' . $pageId . '_ajax_callback'];
   $form['#attached']['library'][] = 'account_modal/account_modal';
+}
+
+/**
+ * Implements hook_ajax_render_alter().
+ */
+function account_modal_ajax_render_alter(array &$data) {
+  $route = \Drupal::routeMatch();
+
+  $helper = new AccountPageHelper();
+
+  $page = $helper->getPageFromRoute($route->getRouteName());
+
+  if (is_null($page)) {
+    return;
+  }
+
+  // TODO: Use this to prepent/append blocks and modify output as necessary.
 }
 
 function account_modal_login_ajax_callback(array $form, FormStateInterface $form_state) {

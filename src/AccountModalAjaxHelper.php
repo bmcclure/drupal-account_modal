@@ -73,12 +73,9 @@ class AccountModalAjaxHelper {
   public static function newProfileCommand(FormStateInterface $formState) {
     $config = \Drupal::config('account_modal.settings');
 
-    $profileBundle = $config->get('profile_bundle') ?: 'customer';
-
-    $profile = \Drupal::entityTypeManager()->getStorage('profile')->create([
-      'type' => $profileBundle,
-      'uid' => \Drupal::currentUser()->id(),
-      'status' => TRUE,
+    $profile = Profile::create([
+      'type' => $config->get('profile_type') ?: 'customer',
+      'langcode' => \Drupal::languageManager()->getDefaultLanguage()->getId(),
       'is_default' => TRUE,
     ]);
 

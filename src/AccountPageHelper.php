@@ -11,7 +11,7 @@ class AccountPageHelper {
   use StringTranslationTrait;
 
   public function getPages() {
-    return [
+    $pages = [
       'page' => [
         'label' => $this->t('User page'),
         'routes' => ['user.page'],
@@ -39,7 +39,27 @@ class AccountPageHelper {
       ],
     ];
 
+    /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
+    $moduleHandler = \Drupal::service('module_handler');
+    $profileIsInstalled = $moduleHandler->moduleExists('profile');
+
+    if ($profileIsInstalled) {
+      $pages['profile_add'] = [
+        'label' => $this->t('Profile add'),
+        'routes' => ['/entity\.profile\.type\..+.\.user_profile_form\.add/'],
+        'form' => '/profile_.+_add_form/',
+      ];
+
+      $pages['profile_edit'] = [
+        'label' => $this->t('Profile edit'),
+        'routes' => ['entity.profile.edit_form'],
+        'form' => '/profile_.+_edit_form/',
+      ];
+    }
+
     // TODO: Create an event to add pages and one to alter them here.
+
+    return $pages;
   }
 
   public function getPageOptions() {
@@ -110,6 +130,14 @@ class AccountPageHelper {
 
         break;
       }
+
+      foreach ($pageInfo['routes'] as $pageRoute) {
+        if (strpos($pageRoute, '/') === 0 && preg_match($pageRoute, $route)) {
+          $page = $pageId;
+
+          break;
+        }
+      }
     }
 
     return $page;
@@ -120,6 +148,12 @@ class AccountPageHelper {
 
     foreach ($this->getEnabledPages() as $pageId => $pageInfo) {
       if ($formId === $pageInfo['form']) {
+        $page = $pageId;
+
+        break;
+      }
+
+      if (strpos($pageInfo['form'], '/') === 0 && preg_match($pageInfo['form'], $formId)) {
         $page = $pageId;
 
         break;

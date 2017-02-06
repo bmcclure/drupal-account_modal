@@ -86,3 +86,11 @@ function account_modal_register_ajax_callback(array $form, FormStateInterface $f
 function account_modal_password_ajax_callback(array $form, FormStateInterface $form_state) {
   return AccountModalAjaxHelper::ajaxCallback('password', $form, $form_state);
 }
+
+function account_modal_profile_add_ajax_callback(array $form, FormStateInterface $form_state) {
+  return AccountModalAjaxHelper::ajaxCallback('profile_add', $form, $form_state);
+}
+
+function account_modal_profile_edit_ajax_callback(array $form, FormStateInterface $form_state) {
+  return AccountModalAjaxHelper::ajaxCallback('profile_edit', $form, $form_state);
+}

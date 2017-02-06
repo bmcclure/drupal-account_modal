@@ -1,0 +1,103 @@
+<?php
+
+/**
+ * @file
+ * Contains account_modal.module.
+ */
+use Drupal\account_modal\AccountModalAjaxHelper;
+use Drupal\account_modal\AccountPageHelper;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_help().
+ */
+function account_modal_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the account_modal module.
+    case 'help.page.account_modal':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Adds the ability to open account links in a modal window') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function account_modal_theme() {
+  return [
+    'account_modal' => [
+      'template' => 'account_modal',
+      'render element' => 'children',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_link_alter().
+ */
+function account_modal_link_alter(&$variables) {
+  /**
+   * The URL of the link.
+   *
+   * @var \Drupal\Core\Url $url
+   */
+  $url = $variables['url'];
+
+  // Return early where possible.
+  if ($url->isExternal()) {
+    return;
+  }
+
+  $routeName = $url->getRouteName();
+
+  $accountPageHelper = new AccountPageHelper();
+
+  $page = $accountPageHelper->getPageFromRoute($routeName);
+
+  if (is_null($page)) {
+    return;
+  }
+
+  $variables['options']['attributes']['class'][] = 'use-ajax';
+  $variables['options']['attributes']['data-dialog-type'] = 'modal';
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $accountPageHelper = new AccountPageHelper();
+
+  $pageId = $accountPageHelper->getPageFromFormId($form_id);
+
+  if (is_null($pageId)) {
+    return;
+  }
+
+  $form['#prefix'] = '<div id="account_modal_' . $pageId . '_wrapper">';
+  $form['#suffix'] = '</div>';
+
+  $form['actions']['submit']['#ajax'] = [
+    'callback' => 'account_modal_' . $pageId . '_ajax_callback',
+  ];
+
+  $form['#attached']['library'][] = 'account_modal/account_modal';
+}
+
+function account_modal_login_ajax_callback(array $form, FormStateInterface $form_state) {
+  return AccountModalAjaxHelper::ajaxCallback('login', $form, $form_state);
+}
+
+function account_modal_register_ajax_callback(array $form, FormStateInterface $form_state) {
+  return AccountModalAjaxHelper::ajaxCallback('register', $form, $form_state);
+}
+
+function account_modal_password_ajax_callback(array $form, FormStateInterface $form_state) {
+  return AccountModalAjaxHelper::ajaxCallback('password', $form, $form_state);
+}

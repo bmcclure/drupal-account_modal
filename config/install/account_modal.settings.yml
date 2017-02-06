@@ -1,2 +1,4 @@
 enabled_pages: {}
-login_redirect: TRUE
+reload_on_success: FALSE
+create_profile_after_registration: FALSE
+profile_type: customer

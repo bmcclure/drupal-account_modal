@@ -6,8 +6,11 @@ use Drupal\account_modal\AjaxCommand\RefreshPageCommand;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AppendCommand;
 use Drupal\Core\Ajax\CloseDialogCommand;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\profile\Entity\Profile;
 
 /**
  * A helper class for creating Ajax responses for Account Modal.
@@ -18,7 +21,7 @@ class AccountModalAjaxHelper {
     $messages = drupal_get_messages(NULL, FALSE);
 
     if (!isset($messages['error'])) {
-      $response->addCommand(new CloseDialogCommand());
+      $response->addCommand(new CloseModalDialogCommand());
 
       switch ($pageId) {
         case 'login':
@@ -28,7 +31,18 @@ class AccountModalAjaxHelper {
           break;
         case 'register':
           drupal_set_message(t('You have successfully created an account. Please wait a moment.'));
-          $response->addCommand(self::redirectCommand($formState));
+
+          $config = \Drupal::config('account_modal.settings');
+
+          /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
+          $moduleHandler = \Drupal::service('module_handler');
+          $profileIsInstalled = $moduleHandler->moduleExists('profile');
+
+          if ($config->get('create_profile_after_registration') && $profileIsInstalled) {
+            $response->addCommand(self::newProfileCommand($formState));
+          } else {
+            $response->addCommand(self::redirectCommand($formState));
+          }
 
           break;
       }
@@ -51,8 +65,27 @@ class AccountModalAjaxHelper {
 
     $config = \Drupal::config('account_modal.settings');
 
-    return ($config->get('prevent_redirect'))
+    return ($config->get('reload_on_success'))
       ? new RefreshPageCommand()
       : new RedirectCommand($base_url . $formState->getRedirect());
+  }
+
+  public static function newProfileCommand(FormStateInterface $formState) {
+    $config = \Drupal::config('account_modal.settings');
+
+    $profileBundle = $config->get('profile_bundle') ?: 'customer';
+
+    $profile = \Drupal::entityTypeManager()->getStorage('profile')->create([
+      'type' => $profileBundle,
+      'uid' => \Drupal::currentUser()->id(),
+      'status' => TRUE,
+      'is_default' => TRUE,
+    ]);
+
+    /** @var \Drupal\Core\Entity\EntityFormBuilderInterface $entityFormBuilder */
+    $entityFormBuilder = \Drupal::service('entity.form_builder');
+    $form = $entityFormBuilder->getForm($profile);
+
+    return new OpenModalDialogCommand('Create a Profile', $form);
   }
 }

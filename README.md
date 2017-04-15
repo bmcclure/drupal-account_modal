@@ -1,4 +1,4 @@
-#Description
+**SUMMARY**
 
 Account Modal lets you:
 - Open the following account pages in a modal:
@@ -10,7 +10,22 @@ Account Modal lets you:
 - Show errors in the dialog without reloading
 - Optionally reload after success instead of redirecting
 
-#Alternatives
+**REQUIREMENTS**
+
+* None
+
+**INSTALLATION**
+
+Install as usual, see http://drupal.org/node/1897420 for further information.
+
+**ALTERNATIVES**
+
 These modules offer similar functionality if Account Modal 
 doesn't fit your needs:
 - [Fancy Login](https://www.drupal.org/project/fancy_login)
+
+
+**CONTACT**
+
+Current maintainers:
+* [bmcclure](https://www.drupal.org/user/278485)

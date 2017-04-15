@@ -3,3 +3,4 @@ type: module
 description: Adds the ability to open account links in a modal window.
 core: 8.x
 package: Custom
+configure: account_modal.admin_settings

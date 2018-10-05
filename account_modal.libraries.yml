@@ -5,4 +5,6 @@ account_modal:
   dependencies:
     - core/jquery
     - core/drupal
+    - core/drupal.ajax
     - core/drupal.dialog
+

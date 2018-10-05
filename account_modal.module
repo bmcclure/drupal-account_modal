@@ -27,6 +27,13 @@ function account_modal_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
+ * {@inheritdoc}
+ */
+function account_modal_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'account_modal/account_modal';
+}
+
+/**
  * Implements hook_link_alter().
  */
 function account_modal_link_alter(&$variables) {

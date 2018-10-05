@@ -67,6 +67,11 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
     return;
   }
 
+  if (!\Drupal::request()->isXmlHttpRequest()) {
+    // The page was opened directly, do not ajaxify the form.
+    return;
+  }
+
   $config = \Drupal::config('account_modal.settings');
 
   if ($config->get('hide_field_descriptions')) {

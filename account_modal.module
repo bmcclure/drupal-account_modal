@@ -30,6 +30,7 @@ function account_modal_help($route_name, RouteMatchInterface $route_match) {
  * {@inheritdoc}
  */
 function account_modal_page_attachments(array &$attachments) {
+  // @todo Only load this if there are account links on the page
   $attachments['#attached']['library'][] = 'account_modal/account_modal';
 }
 
@@ -55,10 +56,22 @@ function account_modal_link_alter(&$variables) {
     return;
   }
 
+  $config = \Drupal::config('account_modal.settings');
+  $dialog_width = $config->get('dialog_width');
+  if (empty($dialog_width) && $dialog_width !== '0') {
+    $dialog_width = '480';
+  }
+
+  $dialog_height = $config->get('dialog_height');
+  if (empty($dialog_height) && $dialog_height !== '0') {
+    $dialog_height = 'auto';
+  }
+
   $variables['options']['attributes']['class'][] = 'use-ajax';
   $variables['options']['attributes']['data-dialog-type'] = 'modal';
   $variables['options']['attributes']['data-dialog-options'] = \Drupal\Component\Serialization\Json::encode([
-    'width' => '480',
+    'width' => $dialog_width,
+    'height' => $dialog_height,
     'dialogClass' => 'account-modal account-modal--' . $page,
   ]);
 }

@@ -26,6 +26,8 @@ class AccountModalSettingsForm extends ConfigFormBase {
       ->set('enabled_pages', $form_state->getValue('enabled_pages'))
       ->set('hide_field_descriptions', $form_state->getValue('hide_field_descriptions'))
       ->set('reload_on_success', $form_state->getValue('reload_on_success'))
+      ->set('dialog_width', $form_state->getValue('dialog_width'))
+      ->set('dialog_height', $form_state->getValue('dialog_height'))
       ->set('create_profile_after_registration', $form_state->getValue('create_profile_after_registration'))
       ->set('profile_type', $form_state->getValue('profile_type'))
       ->set('header_blocks', $form_state->getValue('header_blocks'))
@@ -67,6 +69,20 @@ class AccountModalSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Reload on success'),
       '#description' => $this->t('Reload the page (instead of redirecting) upon completion.'),
       '#default_value' => $config->get('reload_on_success'),
+    ];
+
+    $form['dialog_width'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Dialog width'),
+      '#description' => $this->t('The value should either be the width of the modal window in pixels, or "auto". The default is 480.'),
+      '#default_value' => $config->get('dialog_width'),
+    ];
+
+    $form['dialog_height'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Dialog height'),
+      '#description' => $this->t('The value should either be the height of the modal window in pixels, or "auto". The default is auto.'),
+      '#default_value' => $config->get('dialog_height'),
     ];
 
     /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */

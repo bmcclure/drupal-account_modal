@@ -8,8 +8,12 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * A helper class for managing configured account pages.
  */
 class AccountPageHelper {
+
   use StringTranslationTrait;
 
+  /**
+   * @return array
+   */
   public function getPages() {
     $pages = [
       'page' => [
@@ -35,7 +39,7 @@ class AccountPageHelper {
       'cancel' => [
         'label' => $this->t('Account cancellation'),
         'routes' => ['user.cancel_confirm'],
-        'form' => 'user_cancel', // TODO: Verify what this form ID should be
+        'form' => 'user_cancel',
       ],
     ];
 
@@ -62,9 +66,11 @@ class AccountPageHelper {
     return $pages;
   }
 
+  /**
+   * @return array
+   */
   public function getPageOptions() {
     $pages = $this->getPages();
-
     $options = [];
 
     foreach ($pages as $pageId => $page) {
@@ -74,6 +80,11 @@ class AccountPageHelper {
     return $options;
   }
 
+  /**
+   * @param $page
+   *
+   * @return array
+   */
   public function getRoutes($page) {
     $pages = $this->getPages();
     $routes = [];
@@ -85,6 +96,9 @@ class AccountPageHelper {
     return $routes;
   }
 
+  /**
+   * @return array
+   */
   public function getAllRoutes() {
     $pages = $this->getPages();
     $routes = [];
@@ -96,6 +110,9 @@ class AccountPageHelper {
     return $routes;
   }
 
+  /**
+   * @return array
+   */
   public function getEnabledPages() {
     $config = \Drupal::config('account_modal.settings');
     $enabledPages = $config->get('enabled_pages');
@@ -111,6 +128,11 @@ class AccountPageHelper {
     return $results;
   }
 
+  /**
+   * @param $pageId
+   *
+   * @return mixed|null
+   */
   public function getPage($pageId) {
     $pages = $this->getPages();
 
@@ -121,11 +143,16 @@ class AccountPageHelper {
     return $pages[$pageId];
   }
 
+  /**
+   * @param $route
+   *
+   * @return int|null|string
+   */
   public function getPageFromRoute($route) {
     $page = NULL;
 
     foreach ($this->getEnabledPages() as $pageId => $pageInfo) {
-      if (in_array($route, $pageInfo['routes'])) {
+      if (in_array($route, $pageInfo['routes'], TRUE)) {
         $page = $pageId;
 
         break;
@@ -143,23 +170,27 @@ class AccountPageHelper {
     return $page;
   }
 
+  /**
+   * @param $formId
+   *
+   * @return int|null|string
+   */
   public function getPageFromFormId($formId) {
     $page = NULL;
 
     foreach ($this->getEnabledPages() as $pageId => $pageInfo) {
       if ($formId === $pageInfo['form']) {
         $page = $pageId;
-
         break;
       }
 
       if (strpos($pageInfo['form'], '/') === 0 && preg_match($pageInfo['form'], $formId)) {
         $page = $pageId;
-
         break;
       }
     }
 
     return $page;
   }
+
 }

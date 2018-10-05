@@ -1,28 +1,19 @@
 <?php
 
-/**
- * @file
- * Contains account_modal.module.
- */
 use Drupal\account_modal\AccountModalAjaxHelper;
 use Drupal\account_modal\AccountPageHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
  */
 function account_modal_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    // Main module help for the account_modal module.
-    case 'help.page.account_modal':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Adds the ability to open account links in a modal window') . '</p>';
-      return $output;
-
-    default:
+  if ($route_name === 'help.page.account_modal') {
+    $output = '';
+    $output .= '<h3>' . t('About') . '</h3>';
+    $output .= '<p>' . t('Adds the ability to open account links in a modal window') . '</p>';
+    return $output;
   }
 }
 
@@ -38,12 +29,9 @@ function account_modal_page_attachments(array &$attachments) {
  * Implements hook_link_alter().
  */
 function account_modal_link_alter(&$variables) {
-  /**
-   * @var \Drupal\Core\Url $url
-   */
+  /** @var \Drupal\Core\Url $url */
   $url = $variables['url'];
 
-  // Return early where possible.
   if (!$url->isRouted()) {
     return;
   }
@@ -88,7 +76,6 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
   }
 
   if (!\Drupal::request()->isXmlHttpRequest()) {
-    // The page was opened directly, do not ajaxify the form.
     return;
   }
 
@@ -113,9 +100,7 @@ function account_modal_form_alter(&$form, FormStateInterface $form_state, $form_
  */
 function account_modal_ajax_render_alter(array &$data) {
   $route = \Drupal::routeMatch();
-
   $helper = new AccountPageHelper();
-
   $page = $helper->getPageFromRoute($route->getRouteName());
 
   if (is_null($page)) {

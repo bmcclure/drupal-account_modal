@@ -1,5 +1,5 @@
 account_modal:
-  version: 1.0.0
+  version: VERSION
   js:
     js/account_modal.js: {}
   dependencies:
@@ -7,4 +7,3 @@ account_modal:
     - core/drupal
     - core/drupal.ajax
     - core/drupal.dialog
-

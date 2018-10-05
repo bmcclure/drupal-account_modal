@@ -6,46 +6,48 @@ use Drupal\account_modal\AjaxCommand\RefreshPageCommand;
 use Drupal\block\Entity\Block;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AppendCommand;
-use Drupal\Core\Ajax\CloseDialogCommand;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\profile\Entity\Profile;
 
 /**
  * A helper class for creating Ajax responses for Account Modal.
  */
 class AccountModalAjaxHelper {
+
+  /**
+   * @param $pageId
+   * @param array $form
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
   public static function ajaxCallback($pageId, array $form, FormStateInterface $formState) {
     $response = new AjaxResponse();
-    $messages = drupal_get_messages(NULL, FALSE);
+    $messages = \Drupal::messenger()->all();
 
     if (!isset($messages['error'])) {
       $response->addCommand(new CloseModalDialogCommand());
 
-      switch ($pageId) {
-        case 'login':
-          drupal_set_message(t('You have been successfully logged in. Please wait a moment.'));
-          $response->addCommand(self::redirectCommand($formState));
+      if ($pageId === 'login') {
+        \Drupal::messenger()->addMessage('You have been successfully logged in. Please wait a moment.');
+        $response->addCommand(self::redirectCommand($formState));
+      }
+      elseif ($pageId === 'register') {
+        \Drupal::messenger()->addMessage('You have successfully created an account. Please wait a moment.');
 
-          break;
-        case 'register':
-          drupal_set_message(t('You have successfully created an account. Please wait a moment.'));
+        /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
+        $moduleHandler = \Drupal::service('module_handler');
+        $profileIsInstalled = $moduleHandler->moduleExists('profile');
+        $config = \Drupal::config('account_modal.settings');
 
-          $config = \Drupal::config('account_modal.settings');
-
-          /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
-          $moduleHandler = \Drupal::service('module_handler');
-          $profileIsInstalled = $moduleHandler->moduleExists('profile');
-
-          if ($config->get('create_profile_after_registration') && $profileIsInstalled) {
-            $response->addCommand(self::newProfileCommand($formState));
-          } else {
-            $response->addCommand(self::redirectCommand($formState));
-          }
-
-          break;
+        $command = ($config->get('create_profile_after_registration') && $profileIsInstalled)
+          ? self::newProfileCommand($formState)
+          : self::redirectCommand($formState);
+        $response->addCommand($command);
       }
     }
 
@@ -61,23 +63,28 @@ class AccountModalAjaxHelper {
     return $response;
   }
 
+  /**
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *
+   * @return \Drupal\account_modal\AjaxCommand\RefreshPageCommand|\Drupal\Core\Ajax\RedirectCommand
+   */
   public static function redirectCommand(FormStateInterface $formState) {
     global $base_url;
 
     $config = \Drupal::config('account_modal.settings');
 
-    return ($config->get('reload_on_success'))
+    return $config->get('reload_on_success')
       ? new RefreshPageCommand()
       : new RedirectCommand($base_url . $formState->getRedirect());
   }
 
   /**
    * @param \Drupal\Core\Form\FormStateInterface $formState
+   *
    * @return \Drupal\user\UserInterface|null
    */
   public static function getUidFromFormState(FormStateInterface $formState) {
-    $values = $formState->getValues();
-
+    $values = &$formState->getValues();
     $uid = NULL;
 
     if (isset($values['uid'])) {
@@ -87,11 +94,16 @@ class AccountModalAjaxHelper {
     return $uid;
   }
 
+  /**
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *
+   * @return \Drupal\Core\Ajax\OpenModalDialogCommand
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
   public static function newProfileCommand(FormStateInterface $formState) {
     $config = \Drupal::config('account_modal.settings');
-
     $uid = self::getUidFromFormState($formState);
-
     $profile = \Drupal::entityTypeManager()->getStorage('profile')->create([
       'uid' => $uid,
       'type' => $config->get('profile_type') ?: 'customer',
@@ -100,24 +112,33 @@ class AccountModalAjaxHelper {
 
     /** @var \Drupal\Core\Entity\EntityFormBuilderInterface $entityFormBuilder */
     $entityFormBuilder = \Drupal::service('entity.form_builder');
-    $form = $entityFormBuilder->getForm($profile, 'add', ['uid' => $uid, 'created' => REQUEST_TIME]);
+    $form = $entityFormBuilder->getForm($profile, 'add', [
+      'uid' => $uid,
+      'created' => \Drupal::time()->getRequestTime(),
+    ]);
 
     return new OpenModalDialogCommand('Create a Profile', $form);
   }
 
+  /**
+   * @param array $form
+   */
   public static function hideFieldDescriptions(array &$form) {
     foreach ($form as $key => $element) {
-      if (strpos($key, '#') === 0 || !is_array($element)) {
-        continue; // Skip non-fields or things that aren't arrays
+      if (!is_array($element) || strpos($key, '#') === 0) {
+        continue;
       }
 
       unset($form[$key]['#description']);
-
-      // Now hide any child field descriptions.
       self::hideFieldDescriptions($form[$key]);
     }
   }
 
+  /**
+   * @param array $form
+   *
+   * @throws \Exception
+   */
   public static function injectBlocks(array &$form) {
     $header_blocks = self::getBlocks('header_blocks');
 
@@ -141,16 +162,21 @@ class AccountModalAjaxHelper {
         '#weight' => 200,
         '#attributes' => [
           'class' => ['account-modal-footer'],
-        ]
+        ],
       ];
 
       $form['footer_blocks'] += self::renderBlocks($footer_blocks);
     }
   }
 
+  /**
+   * @param array $blocks
+   *
+   * @return array
+   * @throws \Exception
+   */
   public static function renderBlocks(array $blocks) {
     $out = [];
-
     $view_builder = \Drupal::entityTypeManager()->getViewBuilder('block');
 
     foreach ($blocks as $id) {
@@ -160,11 +186,9 @@ class AccountModalAjaxHelper {
         continue;
       }
 
-      $block = Block::load($id);
-
       /** @var \Drupal\Core\Render\RendererInterface $renderer */
       $renderer = \Drupal::service('renderer');
-
+      $block = Block::load($id);
       $blockView = $view_builder->view($block);
 
       $out[$id] = [
@@ -175,13 +199,15 @@ class AccountModalAjaxHelper {
     return $out;
   }
 
+  /**
+   * @param $key
+   *
+   * @return array|array[]|false|mixed|null|string[]
+   */
   public static function getBlocks($key) {
     $config = \Drupal::config('account_modal.settings');
-
     $blocks = $config->get($key);
-
-    $blocks = preg_split("/\r\n|\n|\r/", $blocks);
-
-    return $blocks;
+    return preg_split("/\r\n|\n|\r/", $blocks);
   }
+
 }

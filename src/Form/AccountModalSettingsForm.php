@@ -44,9 +44,11 @@ class AccountModalSettingsForm extends ConfigFormBase {
     return ['account_modal.settings'];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('account_modal.settings');
-
     $accountPageHelper = new AccountPageHelper();
 
     $form['enabled_pages'] = [
@@ -121,4 +123,5 @@ class AccountModalSettingsForm extends ConfigFormBase {
 
     return parent::buildForm($form, $form_state);
   }
+
 }

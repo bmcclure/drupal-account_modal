@@ -2,8 +2,8 @@
   'use strict';
 
   Drupal.behaviors.accountModal = {
-    attach: function (context) {
-      Drupal.AjaxCommands.prototype.accountModalRefreshPage = function (ajax, response) {
+    attach: function () {
+      Drupal.AjaxCommands.prototype.accountModalRefreshPage = function () {
         window.location.reload();
       };
     }

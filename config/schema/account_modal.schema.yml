@@ -6,13 +6,13 @@ account_modal.settings:
       label: 'Enabled pages'
       mapping:
         page:
-          type: integer
+          type: string
           label: 'Page'
         register:
-          type: integer
+          type: string
           label: 'Register'
         cancel:
-          type: integer
+          type: string
           label: 'Cancel'
         login:
           type: string

@@ -2,5 +2,6 @@ name: Account Modal
 type: module
 description: Adds the ability to open account links in a modal window.
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: User interface
 configure: account_modal.admin_settings
